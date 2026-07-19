@@ -1,46 +1,91 @@
 import re
 
+
+SECTION_ALIASES = {
+    "aim": ["Aim", "Objective", "Objectives"],
+    "theory": ["Theory", "Background", "Concept"],
+    "requirements": ["Requirements", "Requirement", "Apparatus", "Equipment", "Tools", "Software", "Components", "Materials"],
+    "procedure": ["Procedure", "Algorithm", "Steps", "Method"],
+    "observation": ["Observation", "Observations"],
+    "result": ["Result", "Output", "Conclusion", "Expected Output"]
+}
+
+
 class ExperimentParser:
-    """Identifies individual experiments inside a lab manual and numbers them."""
-
-    EXPERIMENT_PATTERNS = [
-        r"Experiment\s*[-:]?\s*(\d+)\s*[:\-]?\s*(.+)",
-        r"Exp\.?\s*(\d+)\s*[:\-]?\s*(.+)",
-        r"EXPERIMENT\s*(\d+)\s*[:\-]?\s*(.+)",
-    ]
-
-    def __init__(self, raw_text: str):
+    def __init__(self, raw_text):
         self.raw_text = raw_text
-        self.lines = raw_text.split("\n")
 
     def find_experiments(self):
-        """Returns list of dicts: {number, title, start_line, end_line, content}"""
-        matches = []
-        for i, line in enumerate(self.lines):
-            for pattern in self.EXPERIMENT_PATTERNS:
-                m = re.match(pattern, line.strip(), re.IGNORECASE)
-                if m:
-                    matches.append({
-                        "number": m.group(1),
-                        "title": m.group(2).strip() if m.lastindex and m.lastindex >= 2 else "Untitled",
-                        "start_line": i
-                    })
-                    break
+        pattern = r"(?im)^\s*(Experiment|Practical|Program|Activity|Exercise)\s*(?:No\.?)?\s*(\d+)\s*[:.\-]?\s*(.*)$"
+
+        matches = list(re.finditer(pattern, self.raw_text))
 
         experiments = []
-        for idx, exp in enumerate(matches):
-            end_line = matches[idx + 1]["start_line"] if idx + 1 < len(matches) else len(self.lines)
-            content = "\n".join(self.lines[exp["start_line"]:end_line]).strip()
+
+        for index, match in enumerate(matches):
+            start = match.start()
+            end = matches[index + 1].start() if index + 1 < len(matches) else len(self.raw_text)
+
+            experiment_text = self.raw_text[start:end].strip()
+
+            exp_type = match.group(1).title()
+            number = match.group(2)
+            title = match.group(3).strip()
+
+            if title.lower().startswith(("aim", "objective")):
+                title = f"{exp_type} {number}"
+
+            if not title:
+                title = f"{exp_type} {number}"
+
+            sections = extract_sections(experiment_text)
+
             experiments.append({
-                "number": exp["number"],
-                "title": exp["title"],
-                "content": content
+                "type": exp_type,
+                "number": number,
+                "title": title,
+                "content": experiment_text,
+                "sections": sections
             })
+
         return experiments
 
-    def get_experiment_by_number(self, number: str):
-        experiments = self.find_experiments()
-        for exp in experiments:
-            if exp["number"] == str(number):
-                return exp
-        return None
+
+def extract_sections(experiment_text):
+    heading_to_key = {}
+
+    all_headings = []
+
+    for key, headings in SECTION_ALIASES.items():
+        for heading in headings:
+            all_headings.append(heading)
+            heading_to_key[heading.lower()] = key
+
+    heading_pattern = "|".join([re.escape(h) for h in all_headings])
+
+    pattern = rf"(?im)^\s*({heading_pattern})\s*:?\s*(.*)$"
+
+    matches = list(re.finditer(pattern, experiment_text))
+
+    sections = {}
+
+    for index, match in enumerate(matches):
+        heading = match.group(1).strip()
+        inline_content = match.group(2).strip()
+
+        start = match.end()
+        end = matches[index + 1].start() if index + 1 < len(matches) else len(experiment_text)
+
+        block_content = experiment_text[start:end].strip()
+
+        full_content = inline_content
+
+        if block_content:
+            full_content += "\n" + block_content
+
+        key = heading_to_key.get(heading.lower())
+
+        if key and full_content.strip():
+            sections[key] = full_content.strip()
+
+    return sections
