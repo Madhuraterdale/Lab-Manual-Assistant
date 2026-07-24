@@ -6,6 +6,7 @@ from modules.procedure_extractor import ProcedureExtractor
 from modules.equipment_extractor import extract_equipment
 from modules.theory_explainer import explain_theory
 from modules.troubleshooting import generate_troubleshooting
+from modules.safety_extractor import extract_safety_guidelines
 from services.llm_service import ask_llm
 
 
@@ -17,7 +18,7 @@ st.set_page_config(
 
 st.title("🧪 AI Lab Manual Assistant")
 st.write(
-    "Upload your lab manual and understand experiments with theory, procedure, equipment, and troubleshooting."
+    "Upload your lab manual and understand experiments with theory, procedure, equipment, safety, and troubleshooting."
 )
 
 uploaded_file = st.file_uploader(
@@ -69,13 +70,15 @@ if uploaded_file:
     procedure_steps = procedure_extractor.get_procedure_steps()
 
     equipment = extract_equipment(experiment, procedure_steps)
+    safety_guidelines = extract_safety_guidelines(experiment, procedure_steps)
     troubleshooting = generate_troubleshooting(experiment)
 
-    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+    tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
         "Overview",
         "Procedure",
         "Theory",
         "Equipment",
+        "Safety",
         "Troubleshooting",
         "Ask AI"
     ])
@@ -144,6 +147,14 @@ if uploaded_file:
             st.info("No equipment or tools clearly found.")
 
     with tab5:
+        st.header("🛡️ Safety Precautions and Guidelines")
+
+        if safety_guidelines:
+            st.table(safety_guidelines)
+        else:
+            st.info("No safety precautions or guidelines found.")
+
+    with tab6:
         st.header("⚠️ Basic Troubleshooting")
 
         if troubleshooting:
@@ -151,7 +162,7 @@ if uploaded_file:
         else:
             st.info("No troubleshooting suggestions available.")
 
-    with tab6:
+    with tab7:
         st.header("🤖 Ask AI")
 
         question = st.text_input(
@@ -184,8 +195,9 @@ Rules:
 - Do not use outside knowledge.
 - Do not invent facts.
 - If the exact answer is not directly written, you may summarize or explain using related information from the manual.
-- You may use the experiment title, aim, theory, procedure, equipment, result, or output to answer.
+- You may use the experiment title, aim, theory, procedure, equipment, safety precautions, result, or output to answer.
 - If the question asks "what we learned", "learning outcome", "purpose", or "summary", explain it using the aim, title, procedure, and result.
+- If the question asks about safety or precautions, answer using safety-related lines, procedure notes, and manual guidelines.
 - If the manual truly does not contain enough related information, say:
 "The uploaded manual does not contain enough information to answer this."
 
@@ -194,6 +206,8 @@ You can answer questions like:
 - What is the theory?
 - What is the procedure?
 - What equipment is required?
+- What safety precautions should I follow?
+- What guidelines should I follow?
 - What is the result?
 - What did we learn from this experiment?
 - Explain this experiment in simple words.
