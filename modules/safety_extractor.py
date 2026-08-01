@@ -264,3 +264,177 @@ def create_context_based_guidelines(experiment):
         ])
 
     return guidelines
+
+import json
+import re
+
+from services.llm_service import ask_llm
+
+
+def extract_safety_guidelines(experiment, procedure_steps):
+    """
+    Generate experiment-specific safety precautions and practical guidelines.
+    Output is based only on selected experiment content.
+    """
+
+    title = experiment.get("title", "")
+    sections = experiment.get("sections", {})
+
+    aim = sections.get("aim", "")
+    theory = sections.get("theory", "")
+    requirements = sections.get("requirements", "")
+    procedure = sections.get("procedure", "")
+    result = sections.get("result", "")
+    content = experiment.get("content", "")
+
+    procedure_text = format_procedure_steps(procedure_steps)
+
+    prompt = f"""
+You are an AI Lab Manual Assistant.
+
+Generate safety precautions and practical guidelines ONLY for the selected experiment.
+
+Use only the selected experiment content below.
+Do not give fixed general points.
+Do not give unrelated safety points.
+Do not use outside knowledge.
+
+Selected Experiment:
+
+Title:
+{title}
+
+Aim:
+{aim}
+
+Theory:
+{theory}
+
+Equipment / Requirements:
+{requirements}
+
+Procedure:
+{procedure}
+
+Structured Procedure Steps:
+{procedure_text}
+
+Result / Output:
+{result}
+
+Full Selected Experiment Content:
+{content}
+
+Rules:
+- Each guideline must be related to this selected experiment.
+- If it is a programming experiment, give execution/programming guidelines related to its topic.
+- If it is a function experiment, give guidelines about function definition, function call, arguments, return value, indentation, and output.
+- If it is a database experiment, give guidelines about table names, queries, conditions, and output.
+- If it is a chemistry experiment, give safety points related to chemicals/apparatus mentioned.
+- If it is an electrical experiment, give safety points related to circuit/components mentioned.
+- Mention step number if the guideline is related to a procedure step.
+- Avoid generic lines like "be careful" unless connected to this experiment.
+
+Return ONLY valid JSON in this format:
+
+[
+  {{
+    "Type": "Experiment-Specific Guideline",
+    "Precaution / Guideline": "write guideline here",
+    "Reason": "why this is needed for this experiment",
+    "Source": "Title/Aim/Procedure/Equipment/Manual Content"
+  }}
+]
+
+Generate 3 to 6 guidelines.
+"""
+
+    try:
+        response = ask_llm(prompt)
+        safety_items = parse_json_response(response)
+
+        if safety_items:
+            return clean_safety_items(safety_items)
+
+        return fallback_from_response(response)
+
+    except Exception as e:
+        return [{
+            "Type": "Safety Generation Error",
+            "Precaution / Guideline": "Safety guidelines could not be generated.",
+            "Reason": str(e),
+            "Source": "AI generation failed"
+        }]
+
+
+def format_procedure_steps(procedure_steps):
+    if not procedure_steps:
+        return "No structured procedure steps found."
+
+    text = ""
+
+    for step in procedure_steps:
+        text += f"""
+Step {step.get("step_number", "")}:
+Action: {step.get("action", "")}
+Equipment Used: {step.get("equipment_used", "")}
+Expected Observation: {step.get("expected_observation", "")}
+Important Note: {step.get("important_note", "")}
+"""
+
+    return text
+
+
+def parse_json_response(response):
+    if not response:
+        return []
+
+    response = response.strip()
+    response = response.replace("```json", "")
+    response = response.replace("```", "")
+    response = response.strip()
+
+    json_match = re.search(r"\[.*\]", response, re.DOTALL)
+
+    if json_match:
+        response = json_match.group(0)
+
+    try:
+        data = json.loads(response)
+
+        if isinstance(data, list):
+            return data
+
+        return []
+
+    except Exception:
+        return []
+
+
+def clean_safety_items(items):
+    cleaned = []
+
+    for item in items:
+        guideline = item.get("Precaution / Guideline", "").strip()
+        reason = item.get("Reason", "").strip()
+        source = item.get("Source", "").strip()
+        item_type = item.get("Type", "").strip()
+
+        if guideline:
+            cleaned.append({
+                "Type": item_type if item_type else "Experiment-Specific Guideline",
+                "Precaution / Guideline": guideline,
+                "Reason": reason if reason else "This guideline is related to the selected experiment.",
+                "Source": source if source else "Selected experiment content"
+            })
+
+    return cleaned
+
+
+def fallback_from_response(response):
+    return [{
+        "Type": "Experiment-Specific Guideline",
+        "Precaution / Guideline": response if response else "No safety guidelines generated.",
+        "Reason": "Generated from selected experiment content.",
+        "Source": "AI response"
+    }]
