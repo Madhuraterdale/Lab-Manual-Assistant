@@ -24,33 +24,227 @@ from services.llm_service import ask_llm
 
 st.set_page_config(
     page_title="AI Lab Manual Assistant",
-    page_icon="🧪",
+    page_icon=None,
     layout="wide"
 )
+
+# Custom Styling for Professional UI
+st.markdown("""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+/* Main font override */
+html, body, [data-testid="stAppViewContainer"], .st-emotion-cache-18ni7ap, .st-emotion-cache-12w0qpk {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+}
+
+/* Gradient Text */
+.gradient-text {
+    background: linear-gradient(135deg, #A5B4FC 0%, #6366F1 50%, #4F46E5 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 800;
+}
+
+/* Custom Card Container */
+.custom-card {
+    background: rgba(30, 41, 59, 0.45) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 16px !important;
+    padding: 24px !important;
+    margin-bottom: 20px !important;
+    backdrop-filter: blur(12px) !important;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.custom-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(99, 102, 241, 0.4) !important;
+    box-shadow: 0 12px 40px 0 rgba(99, 102, 241, 0.15) !important;
+}
+
+/* Timeline steps */
+.step-container {
+    border-left: 3px solid #6366F1;
+    margin-left: 20px;
+    padding-left: 25px;
+    position: relative;
+    padding-bottom: 20px;
+}
+.step-badge {
+    position: absolute;
+    left: -13px;
+    top: 0px;
+    background: #6366F1;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+}
+
+/* Streamlit Button Styling */
+div.stButton > button {
+    background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%) !important;
+    color: #ffffff !important;
+    border: none !important;
+    border-radius: 10px !important;
+    padding: 10px 24px !important;
+    font-weight: 600 !important;
+    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4) !important;
+    transition: all 0.3s ease !important;
+    width: 100% !important;
+}
+
+div.stButton > button:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5) !important;
+    background: linear-gradient(135deg, #4F46E5 0%, #3730A3 100%) !important;
+    border: none !important;
+}
+
+div.stButton > button:active {
+    transform: translateY(1px) !important;
+}
+
+/* File Uploader styling */
+[data-testid="stFileUploader"] {
+    background: rgba(17, 24, 39, 0.3) !important;
+    border: 1px dashed rgba(99, 102, 241, 0.4) !important;
+    border-radius: 14px !important;
+    padding: 14px !important;
+    transition: all 0.3s ease !important;
+}
+[data-testid="stFileUploader"]:hover {
+    border-color: rgba(99, 102, 241, 0.8) !important;
+    background: rgba(17, 24, 39, 0.5) !important;
+}
+
+/* Custom Sidebar styling */
+.css-1542f7a, .st-emotion-cache-6qob1r {
+    background-color: #111827 !important;
+}
+
+/* Tabs Navigation Styling */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 8px !important;
+    background-color: rgba(17, 24, 39, 0.6) !important;
+    padding: 8px !important;
+    border-radius: 14px !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+.stTabs [data-baseweb="tab"] {
+    height: 42px !important;
+    background-color: transparent !important;
+    border-radius: 10px !important;
+    color: #9CA3AF !important;
+    padding: 0px 18px !important;
+    font-weight: 500 !important;
+    border: none !important;
+    transition: all 0.2s ease !important;
+}
+.stTabs [data-baseweb="tab"]:hover {
+    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.05) !important;
+}
+.stTabs [aria-selected="true"] {
+    background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%) !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3) !important;
+}
+.stTabs [data-baseweb="tab-border"] {
+    display: none !important;
+}
+
+/* Custom Table Styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+    font-size: 14px;
+    text-align: left;
+}
+th {
+    background-color: rgba(99, 102, 241, 0.15) !important;
+    color: #A5B4FC !important;
+    font-weight: 600;
+    padding: 12px;
+    border-bottom: 2px solid rgba(99, 102, 241, 0.3);
+}
+td {
+    padding: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    color: #E5E7EB;
+}
+tr:hover {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+/* Input fields styling */
+div[data-baseweb="input"] {
+    background-color: rgba(17, 24, 39, 0.8) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 10px !important;
+    color: #ffffff !important;
+}
+div[data-baseweb="input"]:focus-within {
+    border-color: #6366F1 !important;
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2) !important;
+}
+input {
+    color: #ffffff !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+    color: #FFFFFF !important;
+    font-weight: 600 !important;
+}
+</style>
+""", unsafe_allow_html=True)
 
 
 # ---------------------------------------------------------
 # HEADER
 # ---------------------------------------------------------
 
-st.title("🧪 AI Lab Manual Assistant")
-
-st.write(
-    "Upload your lab manual and understand experiments with "
-    "pre-lab preparation, theory, procedure, equipment, safety, "
-    "troubleshooting, viva questions, lab reports, data analysis, "
-    "study notes, and AI assistance."
-)
+st.markdown("""
+    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 10px; margin-top: -30px;">
+        <h1 class="gradient-text" style="margin: 0; font-size: 2.5rem; font-weight: 800; line-height: 1.2;">
+            AI Lab Manual Assistant
+        </h1>
+    </div>
+    <p style="color: #9CA3AF; font-size: 1.1rem; margin-bottom: 25px;">
+        Your intelligent laboratory co-pilot. Get pre-lab guides, step-by-step procedures, data analysis, safety alerts, viva prep, and instant AI tutor.
+    </p>
+""", unsafe_allow_html=True)
 
 
 # ---------------------------------------------------------
-# FILE UPLOAD
+# SIDEBAR / FILE UPLOAD
 # ---------------------------------------------------------
 
-uploaded_file = st.file_uploader(
-    "Upload PDF / DOCX / TXT",
-    type=["pdf", "docx", "txt"]
-)
+with st.sidebar:
+    st.markdown("""
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; margin-top: -10px;">
+            <h2 class="gradient-text" style="margin: 0; font-size: 1.5rem; font-weight: 700;">AI Lab Console</h2>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("---")
+    
+    uploaded_file = st.file_uploader(
+        "Upload Lab Manual",
+        type=["pdf", "docx", "txt"],
+        help="Upload PDF, DOCX or TXT manual"
+    )
 
 
 if uploaded_file:
@@ -99,13 +293,8 @@ if uploaded_file:
         st.stop()
 
 
-    st.success(
-        f"{len(experiments)} Experiments Detected"
-    )
-
-
     # -----------------------------------------------------
-    # EXPERIMENT SELECTION
+    # EXPERIMENT SELECTION (IN SIDEBAR)
     # -----------------------------------------------------
 
     options = [
@@ -113,16 +302,26 @@ if uploaded_file:
         for exp in experiments
     ]
 
+    with st.sidebar:
+        st.markdown("---")
+        st.markdown("### Selection")
+        selected = st.selectbox(
+            "Select Experiment",
+            options
+        )
+        
+        selected_index = options.index(selected)
+        experiment = experiments[selected_index]
 
-    selected = st.selectbox(
-        "Select Experiment",
-        options
-    )
-
-
-    selected_index = options.index(selected)
-
-    experiment = experiments[selected_index]
+        st.markdown("---")
+        st.markdown("### Console Stats")
+        st.markdown(f"""
+            <div style="font-size: 0.9rem; color: #9CA3AF; line-height: 1.8;">
+                <div><b>File:</b> {uploaded_file.name}</div>
+                <div><b>Total Labs:</b> {len(experiments)}</div>
+                <div><b>Active Lab:</b> {experiment['type']} {experiment['number']}</div>
+            </div>
+        """, unsafe_allow_html=True)
 
 
     # -----------------------------------------------------
@@ -189,56 +388,47 @@ if uploaded_file:
     # =====================================================
 
     with tab1:
+        st.markdown(f"""
+            <div class="custom-card" style="margin-top: 15px;">
+                <div style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: #818CF8; font-weight: 700; margin-bottom: 5px;">
+                    {experiment['type']} {experiment['number']}
+                </div>
+                <h2 style="margin: 0; font-size: 1.8rem; font-weight: 700; color: #FFFFFF;">
+                    {experiment['title']}
+                </h2>
+            </div>
+        """, unsafe_allow_html=True)
 
-        st.header("📌 Experiment Details")
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("""
+                <div class="custom-card" style="height: 100%;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                        <h3 style="margin: 0; font-size: 1.25rem; font-weight: 600; color: #A5B4FC;">Aim / Objectives</h3>
+                    </div>
+            """, unsafe_allow_html=True)
+            sections = experiment.get("sections", {})
+            aim = sections.get("aim", "")
+            if aim:
+                st.write(aim)
+            else:
+                st.info("Aim not found in manual.")
+            st.markdown("</div>", unsafe_allow_html=True)
 
-        st.write(
-            f"**Experiment Number:** "
-            f"{experiment['number']}"
-        )
-
-        st.write(
-            f"**Title:** "
-            f"{experiment['title']}"
-        )
-
-
-        sections = experiment.get(
-            "sections",
-            {}
-        )
-
-
-        aim = sections.get(
-            "aim",
-            ""
-        )
-
-
-        result = sections.get(
-            "result",
-            ""
-        )
-
-
-        st.subheader("🎯 Aim")
-
-        if aim:
-            st.write(aim)
-        else:
-            st.info(
-                "Aim not found in manual."
-            )
-
-
-        st.subheader("✅ Result / Output")
-
-        if result:
-            st.write(result)
-        else:
-            st.info(
-                "Result or output not found in manual."
-            )
+        with col2:
+            st.markdown("""
+                <div class="custom-card" style="height: 100%;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                        <h3 style="margin: 0; font-size: 1.25rem; font-weight: 600; color: #A5B4FC;">Expected Outcomes / Results</h3>
+                    </div>
+            """, unsafe_allow_html=True)
+            result = sections.get("result", "")
+            if result:
+                st.write(result)
+            else:
+                st.info("Result or output not found in manual.")
+            st.markdown("</div>", unsafe_allow_html=True)
 
 
     # =====================================================
@@ -247,7 +437,7 @@ if uploaded_file:
 
     with tab2:
 
-        st.header("🧑‍🔬 Pre-Lab Preparation")
+        st.header("Pre-Lab Preparation")
 
         st.write(
             "Prepare for the selected experiment "
@@ -284,46 +474,35 @@ if uploaded_file:
     # =====================================================
 
     with tab3:
-
-        st.header(
-            "⚙️ Step-by-Step Procedure"
-        )
-
-
+        st.markdown('<div style="margin-top: 15px;"></div>', unsafe_allow_html=True)
         if procedure_steps:
-
             for step in procedure_steps:
-
-                with st.expander(
-                    f"Step {step['step_number']}: "
-                    f"{step['action']}"
-                ):
-
-                    st.write(
-                        f"**Action:** "
-                        f"{step['action']}"
-                    )
-
-                    st.write(
-                        f"**Equipment Used:** "
-                        f"{step['equipment_used']}"
-                    )
-
-                    st.write(
-                        f"**Expected Observation:** "
-                        f"{step['expected_observation']}"
-                    )
-
-                    st.write(
-                        f"**Important Note:** "
-                        f"{step['important_note']}"
-                    )
-
+                st.markdown(f"""
+                    <div class="step-container">
+                        <div class="step-badge">{step['step_number']}</div>
+                        <div class="custom-card" style="margin: 0; padding: 20px;">
+                            <h4 style="margin: 0 0 10px 0; color: #FFFFFF; font-size: 1.1rem;">
+                                {step['action']}
+                            </h4>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 10px; font-size: 0.9rem;">
+                                <div>
+                                    <span style="color: #818CF8; font-weight: 600;">Equipment:</span><br/>
+                                    <span style="color: #D1D5DB;">{step['equipment_used'] or 'None specified'}</span>
+                                </div>
+                                <div>
+                                    <span style="color: #34D399; font-weight: 600;">Expected Observation:</span><br/>
+                                    <span style="color: #D1D5DB;">{step['expected_observation'] or 'None specified'}</span>
+                                </div>
+                                <div>
+                                    <span style="color: #FBBF24; font-weight: 600;">Important Note:</span><br/>
+                                    <span style="color: #D1D5DB;">{step['important_note'] or 'None specified'}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                """, unsafe_allow_html=True)
         else:
-
-            st.info(
-                "Procedure section not found in manual."
-            )
+            st.info("Procedure section not found in manual.")
 
 
     # =====================================================
@@ -333,7 +512,7 @@ if uploaded_file:
     with tab4:
 
         st.header(
-            "📖 AI Theory Explanation"
+            "AI Theory Explanation"
         )
 
 
@@ -393,7 +572,7 @@ if uploaded_file:
     with tab5:
 
         st.header(
-            "🔬 Equipment / Tools"
+            "Equipment and Tools"
         )
 
 
@@ -415,7 +594,7 @@ if uploaded_file:
     with tab6:
 
         st.header(
-            "🛡️ Experiment-Specific Safety Guidelines"
+            "Safety Guidelines"
         )
 
 
@@ -471,7 +650,7 @@ if uploaded_file:
     with tab7:
 
         st.header(
-            "⚠️ Basic Troubleshooting"
+            "Troubleshooting Guide"
         )
 
 
@@ -495,7 +674,7 @@ if uploaded_file:
     with tab8:
 
         st.header(
-            "🎤 Viva Questions"
+            "Viva Questions"
         )
 
 
@@ -540,7 +719,7 @@ if uploaded_file:
     with tab9:
 
         st.header(
-            "📝 Lab Report Generator"
+            "Lab Report Generator"
         )
 
 
@@ -585,30 +764,21 @@ if uploaded_file:
     # =====================================================
 
     with tab10:
-
-        st.header(
-            "📊 Experimental Data Analysis"
-        )
-
-
-        st.write(
-            "Enter numerical observations "
-            "from your experiment."
-        )
-
-
-        values_text = st.text_input(
-            "Enter observations separated by commas",
-            placeholder="10, 12, 11, 13",
-            key="observation_values"
-        )
-
-
-        theoretical_value = st.number_input(
-            "Theoretical value (optional)",
-            value=0.0,
-            key="theoretical_value"
-        )
+        st.markdown('<div style="margin-top: 15px;"></div>', unsafe_allow_html=True)
+        
+        col_inp1, col_inp2 = st.columns(2)
+        with col_inp1:
+            values_text = st.text_input(
+                "Enter observations separated by commas",
+                placeholder="10, 12, 11, 13",
+                key="observation_values"
+            )
+        with col_inp2:
+            theoretical_value = st.number_input(
+                "Theoretical value (optional)",
+                value=0.0,
+                key="theoretical_value"
+            )
 
 
         if st.button(
@@ -644,41 +814,34 @@ if uploaded_file:
                         theory
                     )
 
+                    st.markdown("""
+                        <div class="custom-card" style="margin-top: 20px;">
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                                <h3 style="margin: 0; font-size: 1.25rem; font-weight: 600; color: #34D399;">Analysis Metrics</h3>
+                            </div>
+                    """, unsafe_allow_html=True)
 
-                    st.subheader(
-                        "📈 Analysis Result"
-                    )
-
-
-                    for key, value in result_data.items():
-
-                        if value is None:
-                            continue
-
-
-                        if isinstance(
-                            value,
-                            float
-                        ):
-
-                            st.write(
-                                f"**{key}:** "
-                                f"{value:.4f}"
-                            )
-
-                        else:
-
-                            st.write(
-                                f"**{key}:** "
-                                f"{value}"
-                            )
-
+                    col_res1, col_res2 = st.columns(2)
+                    with col_res1:
+                        for idx, (key, value) in enumerate(result_data.items()):
+                            if value is None:
+                                continue
+                            if idx % 2 == 0:
+                                val_str = f"{value:.4f}" if isinstance(value, float) else str(value)
+                                st.markdown(f"**{key}:** `{val_str}`")
+                    with col_res2:
+                        for idx, (key, value) in enumerate(result_data.items()):
+                            if value is None:
+                                continue
+                            if idx % 2 != 0:
+                                val_str = f"{value:.4f}" if isinstance(value, float) else str(value)
+                                st.markdown(f"**{key}:** `{val_str}`")
+                    st.markdown("</div>", unsafe_allow_html=True)
 
             except ValueError:
 
                 st.error(
-                    "Please enter valid numbers "
-                    "separated by commas."
+                    "Please enter valid numbers separated by commas."
                 )
 
 
@@ -689,7 +852,7 @@ if uploaded_file:
     with tab11:
 
         st.header(
-            "📚 Study & Revision Notes"
+            "Study & Revision Notes"
         )
 
 
@@ -734,7 +897,7 @@ if uploaded_file:
     with tab12:
 
         st.header(
-            "🤖 Ask AI"
+            "Ask AI"
         )
 
 
@@ -874,7 +1037,18 @@ Give the answer in simple, student-friendly language.
 # ---------------------------------------------------------
 
 else:
-
-    st.info(
-        "Please upload a lab manual to begin."
-    )
+    st.markdown("""
+        <div class="custom-card" style="text-align: center; padding: 50px 30px; margin-top: 40px;">
+            <h2 class="gradient-text" style="font-size: 2.2rem; margin-bottom: 10px; font-weight: 800;">
+                Welcome to AI Lab Manual Assistant
+            </h2>
+            <p style="color: #9CA3AF; font-size: 1.1rem; max-width: 650px; margin: 0 auto 30px auto; line-height: 1.6;">
+                Transform static lab manuals into an interactive digital learning environment. 
+                Upload your document to generate experiment guides, safety briefings, step-by-step procedures, 
+                viva preparation sets, and interactive calculations in seconds.
+            </p>
+            <div style="display: inline-block; padding: 12px 24px; border: 1px dashed rgba(99, 102, 241, 0.4); border-radius: 12px; color: #A5B4FC; background: rgba(99, 102, 241, 0.05); font-weight: 500;">
+                Start by uploading a lab manual in the console sidebar
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
