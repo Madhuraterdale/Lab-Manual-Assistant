@@ -1,5 +1,6 @@
 import streamlit as st
-
+import os
+from dotenv import load_dotenv
 from modules.file_processor import extract_text_from_file
 from modules.experiment_parser import ExperimentParser
 from modules.procedure_extractor import ProcedureExtractor
@@ -9,6 +10,9 @@ from modules.troubleshooting import generate_troubleshooting
 from modules.safety_extractor import extract_safety_guidelines
 from modules.viva_generator import generate_viva_questions
 from modules.lab_report_generator import generate_lab_report
+
+load_dotenv()  # Load environment variables from .env file
+api_key = os.getenv("OPENAI_API_KEY")
 
 # Week 6 modules
 from modules.prelab_generator import generate_pre_lab
