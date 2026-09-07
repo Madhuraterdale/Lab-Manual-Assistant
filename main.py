@@ -42,7 +42,7 @@ html, body, [data-testid="stAppViewContainer"], .st-emotion-cache-18ni7ap, .st-e
 .gradient-text {
     background: linear-gradient(135deg, #A5B4FC 0%, #6366F1 50%, #4F46E5 100%);
     -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    -webkit-text-fill-color: white;
     font-weight: 800;
 }
 
@@ -61,7 +61,7 @@ html, body, [data-testid="stAppViewContainer"], .st-emotion-cache-18ni7ap, .st-e
 .custom-card:hover {
     transform: translateY(-2px);
     border-color: rgba(99, 102, 241, 0.4) !important;
-    box-shadow: 0 12px 40px 0 rgba(99, 102, 241, 0.15) !important;
+    box-shadow: 0 12px 40px 0 rgba(255, 255, 255, 1) !important;
 }
 
 /* Timeline steps */
@@ -86,7 +86,7 @@ html, body, [data-testid="stAppViewContainer"], .st-emotion-cache-18ni7ap, .st-e
     justify-content: center;
     font-size: 12px;
     font-weight: bold;
-    box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 1);
 }
 
 /* Streamlit Button Styling */
@@ -97,7 +97,7 @@ div.stButton > button {
     border-radius: 10px !important;
     padding: 10px 24px !important;
     font-weight: 600 !important;
-    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4) !important;
+    box-shadow: 0 4px 14px rgba(255, 255, 255, 1) !important;
     transition: all 0.3s ease !important;
     width: 100% !important;
 }
